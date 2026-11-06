@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Anis-LAB — wirtualne laboratorium molekularnych interakcji pasozyt-zywiciel. SKN Paradise, UWM Olsztyn.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html,body{margin:0}body{font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Anis-LAB Cichy Dialog</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Poppins:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: zeszyt laboratoryjny — jedna kolumna kart na liliowym tle, pasek postępu u góry, panel referencyjny wysuwany z prawej. */
+:root{
+  --ground:#efeaf6;        /* liliowe tło */
+  --card:#ffffff;
+  --ink:#2e1b43;           /* głęboki fiolet — tekst */
+  --ink-soft:#6b5a80;
+  --violet:#5b3b78;        /* akcent główny */
+  --violet-bright:#7e57a8;
+  --lilac:#c9b6e0;
+  --mist:#f6f1fb;
+  --line:#e0d4ee;
+  --pro:#c24c5c;           /* prozapalne */
+  --anti:#2f8f82;          /* przeciwzapalne */
+  --redox:#c7861f;         /* redoks */
+  --flat:#8d80a0;          /* bez zmian */
+  --ok:#2f7d4f;
+  --warn:#b4661a;
+  --bad:#a8343f;
+  --on-violet:#ffffff;
+  --shadow:0 1px 2px rgba(46,27,67,.06),0 8px 24px rgba(46,27,67,.07);
+  --f-disp:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-body:"Poppins","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#191122;--card:#241733;--ink:#f1e8fa;--ink-soft:#b9a6cf;--violet:#c0a0e2;
+  --violet-bright:#d3b8f0;--lilac:#6d5389;--mist:#2d1e3f;--line:#3d2b53;
+  --pro:#e8828f;--anti:#6fd0c0;--redox:#e8b65c;--flat:#9b8db0;
+  --ok:#74d194;--warn:#e8a860;--bad:#f08a95;--on-violet:#1b1026;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --ground:#191122;--card:#241733;--ink:#f1e8fa;--ink-soft:#b9a6cf;--violet:#c0a0e2;
+  --violet-bright:#d3b8f0;--lilac:#6d5389;--mist:#2d1e3f;--line:#3d2b53;
+  --pro:#e8828f;--anti:#6fd0c0;--redox:#e8b65c;--flat:#9b8db0;
+  --ok:#74d194;--warn:#e8a860;--bad:#f08a95;--on-violet:#1b1026;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-weight:300;
+  line-height:1.6;margin:0;-webkit-text-size-adjust:100%}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 56px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.9rem,6vw,2.9rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.3rem,3.6vw,1.75rem)}
+h3{font-size:1.06rem;font-family:var(--f-body);font-weight:600;letter-spacing:.01em}
+p{margin:0}
+.kicker{font-size:.69rem;letter-spacing:.17em;text-transform:uppercase;font-weight:600;
+  color:var(--violet);font-family:var(--f-body)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* pasek nawigacji / postępu */
+#topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--ground);
+  border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);
+  z-index:21;background:var(--ground)}
+.topin{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:9px}
+.brand{font-family:var(--f-disp);font-weight:700;font-size:.98rem;letter-spacing:-.01em;
+  margin-right:auto;display:flex;align-items:center;gap:7px;min-width:0}
+.brand svg{flex:0 0 auto}
+.brand span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.steps{display:flex;gap:4px;align-items:center}
+.pip{width:22px;height:5px;border-radius:3px;background:var(--line);transition:background .25s}
+.pip.done{background:var(--lilac)}
+.pip.now{background:var(--violet)}
+.tbtn{font:inherit;font-size:.78rem;font-weight:500;background:var(--card);color:var(--violet);
+  border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
+.tbtn:hover{border-color:var(--violet)}
+
+/* karty */
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
+  box-shadow:var(--shadow);margin-top:18px}
+.card.flat{box-shadow:none}
+.card>*+*{margin-top:12px}
+.lede{color:var(--ink-soft);font-size:1.01rem}
+.hr{height:1px;background:var(--line);border:0;margin:16px 0}
+
+/* przyciski */
+.btn{font:inherit;font-weight:500;font-size:.95rem;background:var(--violet);color:var(--on-violet);
+  border:0;border-radius:11px;padding:11px 20px;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--violet-bright)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--violet);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--mist);border-color:var(--violet)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row.end{justify-content:flex-end}
+
+/* wybory protokołu */
+.opts{display:grid;gap:10px}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:.92rem;background:var(--mist);
+  border:1px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer;color:var(--ink)}
+.opt:hover{border-color:var(--violet)}
+.opt:disabled{cursor:default}
+.opt .ol{display:block;font-weight:500}
+.opt[data-state="good"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 9%,var(--card))}
+.opt[data-state="meh"]{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 9%,var(--card))}
+.opt[data-state="bad"]{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 9%,var(--card))}
+.opt[data-state="dim"]{opacity:.45}
+.fb{font-size:.88rem;border-left:3px solid var(--lilac);padding:9px 0 9px 13px;color:var(--ink-soft)}
+.fb b{color:var(--ink);font-weight:600}
+.fb.good{border-color:var(--ok)}
+.fb.meh{border-color:var(--warn)}
+.fb.bad{border-color:var(--bad)}
+
+/* dane / tabele / wykresy */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:420px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:600;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft)}
+th .u{text-transform:none;letter-spacing:0;font-size:.8rem}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+figure{margin:0}
+figcaption{font-size:.79rem;color:var(--ink-soft);margin-top:7px}
+svg.chart{display:block;width:100%;height:auto;max-width:100%}
+
+/* badge / pills */
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:.73rem;font-weight:500;
+  border-radius:999px;padding:3px 10px;border:1px solid var(--line);background:var(--mist);
+  color:var(--ink-soft)}
+.pill.pro{color:var(--pro);border-color:color-mix(in srgb,var(--pro) 40%,var(--line))}
+.pill.anti{color:var(--anti);border-color:color-mix(in srgb,var(--anti) 40%,var(--line))}
+.pill.redox{color:var(--redox);border-color:color-mix(in srgb,var(--redox) 40%,var(--line))}
+
+/* suwaki i budżet */
+.ctl{display:grid;gap:6px;margin-top:14px}
+.ctl label{font-size:.82rem;font-weight:500}
+.ctl .v{font-family:var(--f-mono);color:var(--violet);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--violet)}
+.budget{display:flex;align-items:baseline;gap:8px;font-size:.82rem;color:var(--ink-soft)}
+.budget .big{font-family:var(--f-mono);font-size:1.5rem;font-weight:600;color:var(--ink)}
+.bar{height:7px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--violet);transition:width .25s}
+.bar i.over{background:var(--bad)}
+
+/* siatka wyborów analitów */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}
+.chk{display:flex;gap:10px;align-items:flex-start;background:var(--mist);border:1px solid var(--line);
+  border-radius:12px;padding:11px 13px;cursor:pointer;min-width:0}
+.chk:hover{border-color:var(--violet)}
+.chk input{margin:4px 0 0;accent-color:var(--violet);flex:0 0 auto}
+.chk .t{min-width:0}
+.chk .t b{font-weight:600;font-size:.9rem;display:block}
+.chk .t small{color:var(--ink-soft);font-size:.76rem;line-height:1.4;display:block}
+.chk[data-on="1"]{border-color:var(--violet);background:color-mix(in srgb,var(--violet) 7%,var(--card))}
+
+/* dose chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:.85rem;font-family:var(--f-mono);background:var(--mist);
+  border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink)}
+.chip[data-on="1"]{background:var(--violet);color:var(--on-violet);border-color:var(--violet)}
+.chip[disabled]{opacity:.4;cursor:not-allowed}
+.chip.fixed{background:var(--lilac);border-color:var(--lilac);color:var(--ink);cursor:default}
+
+/* panel referencyjny */
+#atlas{position:fixed;inset:0;z-index:40;background:rgba(30,18,45,.5);display:flex;
+  justify-content:flex-end}
+#atlas[hidden]{display:none!important}
+.panel{background:var(--card);width:min(480px,100%);height:100%;overflow-y:auto;
+  padding-left:max(18px,env(safe-area-inset-left,0px));
+  padding-right:max(18px,env(safe-area-inset-right,0px));
+  padding-block:calc(18px + env(safe-area-inset-top,0px)) calc(30px + env(safe-area-inset-bottom,0px));
+  border-left:1px solid var(--line)}
+.panel>*+*{margin-top:14px}
+.mech{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--mist)}
+.mech h4{margin:0 0 5px;font-size:.93rem;font-weight:600;font-family:var(--f-body)}
+.mech p{font-size:.85rem;color:var(--ink-soft)}
+.mech .src{font-size:.75rem;margin-top:7px}
+a{color:var(--violet);text-decoration-thickness:1px;text-underline-offset:2px}
+
+/* termin z objaśnieniem */
+.term{border-bottom:1px dotted var(--violet);cursor:help;font-weight:400}
+
+/* raport */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:.88rem}
+.kv dt{color:var(--ink-soft)}
+.kv dd{margin:0;font-weight:500}
+.match{display:grid;gap:8px}
+.mrow{display:flex;gap:10px;align-items:center;font-size:.87rem;background:var(--mist);
+  border:1px solid var(--line);border-radius:10px;padding:9px 12px;flex-wrap:wrap}
+.mrow .nm{font-weight:600;min-width:62px}
+.mrow .ar{font-family:var(--f-mono);font-weight:600}
+.note{font-size:.8rem;color:var(--ink-soft);background:var(--mist);border:1px dashed var(--line);
+  border-radius:11px;padding:11px 13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+footer{margin-top:28px;font-size:.78rem;color:var(--ink-soft)}
+footer a{color:var(--ink-soft)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="topbar"><div class="topin">
+  <strong class="brand">
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <circle cx="10" cy="10" r="3.4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <circle cx="10" cy="2.6" r="1.5" fill="currentColor"/>
+    </svg>
+    <span>Anis-LAB</span>
+  </strong>
+  <div class="steps" id="pips" aria-hidden="true"></div>
+  <button class="tbtn" id="atlasBtn" type="button">Atlas</button>
+</div></div>
+
+<main class="wrap" id="app"></main>
+
+<div id="atlas" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-label="Atlas Niewidzialnego">
+    <div class="row"><span class="kicker">Warstwa referencyjna</span>
+      <button class="tbtn" id="atlasClose" type="button" style="margin-left:auto">Zamknij</button></div>
+    <h2>Atlas Niewidzialnego</h2>
+    <p class="lede" style="font-size:.9rem">Mechanizmy, którymi pasożyty rozmawiają z układem odpornościowym żywiciela. Karty można dopisywać — każda to jeden mechanizm, jedno źródło.</p>
+    <div id="mechs"></div>
+    <div class="hr"></div>
+    <h3>Słownik</h3>
+    <div id="gloss"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Anis-LAB — moduł „Cichy dialog”
+   SKN Biochemii i Biologii Molekularnej w Parazytologii „Paradise”, UWM Olsztyn
+   Kierunki odpowiedzi odwzorowane z: Stawicka M., Niestępska A., Stryiński R.,
+   Int J Med Microbiol 2026;323:151740 (PMID 42777528).
+   Wartości bezwzględne są ilustracyjne — publikacja podaje kierunki zmian.
+   ============================================================ */
+
+/* ---------- dane merytoryczne ---------- */
+
+const ANALYTES = [
+  {id:"IL8",  nm:"IL-8",   grp:"pro",  unit:"pg/ml",     base:430, dir:-1, emax:0.62, cost:6,
+   desc:"Chemokina prozapalna — wzywa neutrofile do nabłonka."},
+  {id:"IL10", nm:"IL-10",  grp:"anti", unit:"pg/ml",     base:36,  dir:+1, emax:1.15, cost:6,
+   desc:"Cytokina przeciwzapalna — hamuje odpowiedź zapalną."},
+  {id:"IL13", nm:"IL-13",  grp:"anti", unit:"pg/ml",     base:21,  dir:+1, emax:0.95, cost:6,
+   desc:"Cytokina typu 2 — przeciwzapalna, związana z odpowiedzią na robaki."},
+  {id:"IL4",  nm:"IL-4",   grp:"flat", unit:"pg/ml",     base:12,  dir:0,  emax:0.05, cost:6,
+   desc:"Cytokina typu 2. Kontrola negatywna hipotezy — sprawdź, czy się zmienia."},
+  {id:"IL6",  nm:"IL-6",   grp:"flat", unit:"pg/ml",     base:98,  dir:0,  emax:0.06, cost:6,
+   desc:"Cytokina plejotropowa, zwykle prozapalna."},
+  {id:"IFNg", nm:"IFN-γ",  grp:"flat", unit:"pg/ml",     base:17,  dir:0,  emax:0.06, cost:6,
+   desc:"Cytokina typu 1, kluczowa dla odpowiedzi przeciwwirusowej."},
+  {id:"IL33", nm:"IL-33",  grp:"pro",  unit:"pg/ml",     base:148, dir:-1, emax:0.55, cost:7,
+   desc:"Alarmina — sygnał uszkodzenia uwalniany przez nabłonek."},
+  {id:"TSLP", nm:"TSLP",   grp:"pro",  unit:"pg/ml",     base:86,  dir:-1, emax:0.48, cost:7,
+   desc:"Alarmina nabłonkowa, uruchamia odpowiedź typu 2."},
+  {id:"SOD",  nm:"SOD",    grp:"redox",unit:"U/mg białka",base:4.2, dir:+1, emax:0.50, cost:5,
+   desc:"Dysmutaza ponadtlenkowa — enzym antyoksydacyjny."},
+  {id:"MDA",  nm:"MDA",    grp:"redox",unit:"nmol/mg",   base:2.6, dir:-1, emax:0.38, cost:5,
+   desc:"Dialdehyd malonowy — marker peroksydacji lipidów."},
+  {id:"TAC",  nm:"TAC",    grp:"redox",unit:"mmol/l",    base:0.74,dir:+1, emax:0.22, cost:5, unc:true,
+   desc:"Całkowita zdolność antyoksydacyjna."},
+  {id:"GSH",  nm:"GSH",    grp:"redox",unit:"µmol/mg",   base:5.1, dir:+1, emax:0.20, cost:5, unc:true,
+   desc:"Glutation zredukowany — główny bufor redoks komórki."}
+];
+const A_BY_ID = Object.fromEntries(ANALYTES.map(a=>[a.id,a]));
+
+const PUBLISHED = {
+  IL8:"spadek", IL10:"wzrost", IL13:"wzrost",
+  IL4:"bez istotnej zmiany", IL6:"bez istotnej zmiany", IFNg:"bez istotnej zmiany",
+  IL33:"spadek zależny od dawki", TSLP:"spadek zależny od dawki",
+  SOD:"wzrost aktywności", MDA:"spadek peroksydacji lipidów",
+  TAC:"zmiana (kierunek nie podany w abstrakcie)", GSH:"zmiana (kierunek nie podany w abstrakcie)"
+};
+
+const STEPS = [
+  {
+    q:"Skąd bierzesz materiał, z którego będziesz izolować pęcherzyki?",
+    why:"Pęcherzyki mają ok. 30–200 nm. W tej skali wszystko, co pochodzi od ryby, bakterii albo z rozbitych komórek larwy, wygląda podobnie i trafi do Twojej próbki.",
+    opts:[
+      {t:"Żywe larwy L3 wypreparowane z mięśni ryby, przemyte w PBS i inkubowane w medium bez surowicy",
+       s:"good", f:"Dobrze. Larwa musi żyć i wydzielać, a przemycie usuwa pęcherzyki pochodzenia rybiego i bakteryjnego. Medium zbierasz po inkubacji — to w nim są pęcherzyki pasożyta."},
+      {t:"Larwy prosto z tkanki ryby, bez przemywania",
+       s:"bad", f:"To jest najczęstszy błąd w badaniach EV pasożytów. Razem z larwą zbierasz pęcherzyki ryby i mikroflory. Każdy późniejszy wynik będzie nieprzypisywalny do pasożyta."},
+      {t:"Homogenat całych larw",
+       s:"bad", f:"Homogenat to zawartość rozbitych komórek, a nie pęcherzyki wydzielone przez żywego pasożyta. Dostaniesz frakcję bogatą w białko i ubogą w pęcherzyki."}
+    ]
+  },
+  {
+    q:"W jakim medium inkubujesz larwy, żeby zebrać wydzielane pęcherzyki?",
+    why:"Surowica bydlęca (FBS) sama zawiera ogromne ilości pęcherzyków. Dodana do medium zdominuje próbkę.",
+    opts:[
+      {t:"Medium bez surowicy, krótka inkubacja z kontrolą żywotności larw",
+       s:"good", f:"Tak. Brak surowicy to brak obcych pęcherzyków. Dlatego inkubacja musi być krótka i trzeba sprawdzać żywotność — larwa pozbawiona surowicy nie przetrwa długo."},
+      {t:"Medium z 10% FBS, żeby larwy czuły się dobrze",
+       s:"bad", f:"FBS wnosi własne pęcherzyki w stężeniu przewyższającym to, co wydzieli larwa. Nie da się potem odróżnić, co jest czyje."},
+      {t:"Medium z FBS zubożonym w pęcherzyki (EV-depleted)",
+       s:"meh", f:"Kompromis stosowany w literaturze. Lepszy niż zwykły FBS, ale zubożenie nigdy nie jest całkowite — zostaje tło, które trzeba uwzględnić w kontroli."}
+    ]
+  },
+  {
+    q:"Jak oddzielasz pęcherzyki od resztek i wolnego białka?",
+    why:"Każda metoda izolacji to wybór między wydajnością a czystością. Nie ma metody dobrej pod oba kryteria.",
+    opts:[
+      {t:"Wirowanie różnicowe (usunięcie komórek i resztek), potem ultrawirowanie i wirowanie w gradiencie gęstości",
+       s:"good", f:"Najwyższa czystość. Gradient oddziela pęcherzyki od agregatów białkowych o podobnej masie — bez tego kroku „frakcja EV” to często głównie białko."},
+      {t:"Jedno wirowanie 2000 × g i zebranie supernatantu",
+       s:"bad", f:"2000 × g usuwa komórki i duże resztki, ale pęcherzyki zostają w supernatancie razem z całym wolnym białkiem. To nie jest izolacja, to tylko oczyszczenie wstępne."},
+      {t:"Komercyjny odczynnik precypitujący (typu polimer PEG)",
+       s:"meh", f:"Szybkie i wydajne, ale precypituje również białka i kompleksy. Dostaniesz dużo cząstek i jeszcze więcej białka — niski stosunek cząstek do białka."}
+    ]
+  },
+  {
+    q:"Czym potwierdzasz, że wyizolowana frakcja to naprawdę pęcherzyki?",
+    why:"Nazwanie frakcji „pęcherzykami” bez charakterystyki jest założeniem, nie wynikiem. Minimalne wymagania obejmują pomiar rozkładu wielkości, obraz struktury i ocenę czystości.",
+    opts:[
+      {t:"Rozkład wielkości (NTA), obraz w mikroskopie elektronowym (TEM) i stosunek liczby cząstek do ilości białka",
+       s:"good", f:"Zestaw komplementarny: NTA daje rozkład wielkości i stężenie, TEM pokazuje, że cząstki mają błonę, a stosunek cząstek do białka mówi, ile w próbce jest zanieczyszczeń."},
+      {t:"Pomiar stężenia białka metodą Bradforda",
+       s:"bad", f:"Białko zmierzysz zawsze — również w próbce, w której nie ma ani jednego pęcherzyka. To nie jest dowód."},
+      {t:"Tylko NTA",
+       s:"meh", f:"NTA policzy cząstki o właściwej wielkości, ale nie odróżni pęcherzyka od agregatu białkowego tej samej średnicy. Potrzebny jest jeszcze obraz i ocena czystości."}
+    ]
+  }
+];
+
+const CONCLUSIONS = [
+  {id:"A", t:"Pęcherzyki Anisakis niszczą komórki nabłonka jelitowego.",
+   ok:false, f:"Nic w tym eksperymencie tego nie mierzy. Żywotność i integralność komórek wymagają osobnych testów (np. MTT, LDH). Co więcej, kierunek uzyskanych zmian — spadek markera peroksydacji lipidów i wzrost aktywności enzymu antyoksydacyjnego — wskazuje raczej na kontrolowaną odpowiedź niż na uszkodzenie."},
+  {id:"B", t:"Pęcherzyki Anisakis zależnie od stężenia wyciszają odpowiedź prozapalną nabłonka i modulują jego równowagę redoks.",
+   ok:true, f:"To wniosek na miarę danych. Mówi o kierunku, zaznacza zależność od dawki i nie wychodzi poza model komórkowy, w którym był badany."},
+  {id:"C", t:"Pęcherzyki Anisakis mogą być stosowane w leczeniu chorób zapalnych jelit.",
+   ok:false, f:"Przeskok z monowarstwy komórkowej do terapii u człowieka pomija kilka poziomów dowodu: modele zwierzęce, toksykologię, farmakokinetykę, badania kliniczne. Taki wniosek bywa stawiany w komunikatach prasowych — i właśnie dlatego warto umieć go rozpoznać."},
+  {id:"D", t:"Pęcherzyki Anisakis nie wpływają na komórki Caco-2.",
+   ok:false, f:"Sprawdź, czy przypadkiem nie wybrałaś/eś wyłącznie analitów, które się nie zmieniają. Brak zmiany w IL-4, IL-6 i IFN-γ jest wynikiem, ale nie upoważnia do stwierdzenia o braku wpływu — to tylko informacja, że wpływ nie dotyczy tych cząsteczek."},
+  {id:"E", t:"Pęcherzyki Anisakis podnoszą poziom wszystkich badanych cytokin.",
+   ok:false, f:"Zmiany idą w przeciwnych kierunkach — to jest najciekawsza część wyniku. Jedne cząsteczki rosną, inne spadają, a część nie reaguje. Właśnie ta selektywność świadczy o regulacji, a nie o nieswoistym pobudzeniu."}
+];
+
+const MECHS = [
+  {h:"Pęcherzyki zewnątrzkomórkowe jako przesyłka",
+   p:"Pasożyt nie musi wnikać do komórki żywiciela, żeby na nią wpłynąć. Wydziela pęcherzyki o średnicy kilkudziesięciu do kilkuset nanometrów, zawierające białka, lipidy i kwasy nukleinowe, które są pobierane przez komórki żywiciela i zmieniają ich zachowanie.",
+   s:"Stawicka i wsp. 2026, Int J Med Microbiol 323:151740", u:"https://pubmed.ncbi.nlm.nih.gov/42777528/"},
+  {h:"Wyciszanie alarmin",
+   p:"IL-33 i TSLP to sygnały, które nabłonek wysyła, kiedy zostanie uszkodzony — uruchamiają odpowiedź immunologiczną typu 2. Obniżenie ich wydzielania oznacza, że komórka nie ogłasza alarmu, mimo że coś na nią oddziałuje.",
+   s:"Pierwszy opis dla EV A. simplex: Stawicka i wsp. 2026", u:"https://pubmed.ncbi.nlm.nih.gov/42777528/"},
+  {h:"Przesunięcie równowagi pro- i przeciwzapalnej",
+   p:"Spadek IL-8 przy jednoczesnym wzroście IL-10 i IL-13 nie jest wyłączeniem układu odpornościowego, lecz przestawieniem go na tryb tolerancji. Dla pasożyta to warunek przetrwania: zapalenie szkodzi i jemu, i żywicielowi.",
+   s:"Stawicka i wsp. 2026", u:"https://pubmed.ncbi.nlm.nih.gov/42777528/"},
+  {h:"Modulacja, nie uszkodzenie",
+   p:"Wzrost aktywności dysmutazy ponadtlenkowej przy jednoczesnym spadku peroksydacji lipidów wskazuje na precyzyjnie regulowaną odpowiedź antyoksydacyjną, a nie na stres oksydacyjny uszkadzający komórkę. To rozróżnienie decyduje o interpretacji całego eksperymentu.",
+   s:"Stawicka i wsp. 2026", u:"https://pubmed.ncbi.nlm.nih.gov/42777528/"},
+  {h:"Dlaczego akurat Caco-2",
+   p:"Linia Caco-2 pochodzi z gruczolakoraka jelita grubego człowieka, ale po zróżnicowaniu tworzy monowarstwę z mikrokosmkami i ścisłymi połączeniami — zachowuje się jak nabłonek jelita cienkiego. To standardowy model bariery jelitowej, czyli pierwszej powierzchni, którą larwa napotyka po zjedzeniu.",
+   s:"Model powszechnie stosowany w badaniach bariery jelitowej", u:""},
+  {h:"Gdzie człowiek wchodzi w cykl",
+   p:"Człowiek nie jest żywicielem ostatecznym Anisakis simplex — jest żywicielem przypadkowym. Larwa L3 nie dokończy w nas rozwoju, ale może wniknąć w ścianę przewodu pokarmowego i wywołać anisakiozę. Dlatego interakcja larwa–nabłonek jest kluczowym momentem tej choroby.",
+   s:"", u:""}
+];
+
+const GLOSS = [
+  ["EV (pęcherzyki zewnątrzkomórkowe)","Otoczone błoną struktury wydzielane przez komórki, przenoszące białka, lipidy i kwasy nukleinowe między komórkami."],
+  ["L3","Trzecie stadium larwalne — to ono jest inwazyjne dla człowieka i obecne w mięśniach ryb."],
+  ["NTA","Nanoparticle tracking analysis — pomiar rozkładu wielkości i stężenia cząstek na podstawie ich ruchu Browna."],
+  ["TEM","Transmisyjna mikroskopia elektronowa — pozwala zobaczyć, że cząstka ma dwuwarstwową błonę."],
+  ["ELISA","Test immunoenzymatyczny; mierzy stężenie konkretnego białka, np. cytokiny, w płynie."],
+  ["Alarmina","Cząsteczka uwalniana przez uszkodzoną komórkę jako sygnał ostrzegawczy dla układu odpornościowego."],
+  ["Cytokina","Białko sygnałowe układu odpornościowego; może nasilać albo wyciszać odpowiedź zapalną."],
+  ["Stosunek cząstek do białka","Miara czystości preparatu EV: ile cząstek wypada na mikrogram białka. Im więcej, tym mniej zanieczyszczeń."],
+  ["Zależność dawka–odpowiedź","Jeśli efekt rośnie wraz ze stężeniem, jest to mocny argument, że efekt jest rzeczywisty, a nie przypadkowy."],
+  ["Kontrola","Próba traktowana identycznie, ale bez badanego czynnika. Bez niej żadna liczba nic nie znaczy."],
+  ["Powtórzenie techniczne","Ten sam materiał zmierzony kilka razy; pokazuje precyzję pomiaru, nie zmienność biologiczną."],
+  ["SOD","Dysmutaza ponadtlenkowa; enzym rozkładający anionorodnik ponadtlenkowy."],
+  ["MDA","Dialdehyd malonowy; produkt utleniania lipidów, używany jako marker uszkodzeń oksydacyjnych."]
+];
+
+const LEVELS = {
+  uczen:  {nm:"Uczeń",   doses:2, hints:true,  raw:false, stats:false, budget:48,
+           d:"Podpowiedzi włączone, wyniki podane jako średnie, bez statystyki."},
+  student:{nm:"Student", doses:3, hints:false, raw:false, stats:true,  budget:58,
+           d:"Bez podpowiedzi, wyniki z odchyleniem standardowym i oceną istotności."},
+  badacz: {nm:"Badacz",  doses:3, hints:false, raw:true,  stats:true,  budget:58,
+           d:"Surowe powtórzenia, samodzielna ocena istotności przed podsumowaniem."}
+};
+</script>
+
+<script>
+"use strict";
+/* ---------- stan ---------- */
+const S = {
+  screen:0, level:null,
+  picks:[],                 // wybory w protokole
+  quality:0, ratio:0, ntaMode:0, ntaOk:null, charOk:null,
+  doses:[], hours:12, analytes:[], spent:0,
+  results:null, userSig:{}, conclusion:null, redoCount:0
+};
+const SCREENS = ["start","protokol","charakterystyka","ekspozycja","odczyty","wyniki","interpretacja","raport"];
+const app = document.getElementById("app");
+
+/* ---------- narzędzia ---------- */
+const esc = t => String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (v,d=1) => Number(v).toLocaleString("pl-PL",{minimumFractionDigits:d,maximumFractionDigits:d});
+function rng(seed){let x=seed>>>0||1;return()=>{x^=x<<13;x>>>=0;x^=x>>17;x^=x<<5;x>>>=0;return x/4294967296;};}
+function gauss(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+function pips(){
+  const el=document.getElementById("pips");
+  el.innerHTML = SCREENS.slice(1).map((_,i)=>{
+    const n=i+1; const c = n<S.screen?"done":(n===S.screen?"now":"");
+    return `<i class="pip ${c}"></i>`;
+  }).join("");
+}
+function go(n){ S.screen=n; render(); window.scrollTo({top:0,behavior:"instant"}); }
+
+/* ---------- model odpowiedzi ---------- */
+const EC50 = 6;                                  // µg/ml
+const tf = h => h===6?0.45 : h===12?0.75 : 1.0;
+function cv(){ return 0.055 + (4 - S.quality)*0.022; }   // im gorsza izolacja, tym większy rozrzut
+
+function simulate(){
+  const conds = [0, ...S.doses].sort((a,b)=>a-b);
+  const out = {conds, hours:S.hours, data:{}};
+  const r = rng(Math.floor(Math.random()*1e9));
+  S.analytes.forEach(id=>{
+    const a = A_BY_ID[id];
+    out.data[id] = conds.map(d=>{
+      const eff = a.dir * a.emax * (d/(EC50+d)) * tf(S.hours);
+      const mu  = a.base * (1 + eff);
+      const reps = [0,1,2].map(()=> Math.max(0, mu * (1 + gauss(r)*cv())));
+      const mean = reps.reduce((x,y)=>x+y,0)/3;
+      const sd   = Math.sqrt(reps.reduce((x,y)=>x+(y-mean)**2,0)/2);
+      return {dose:d, reps, mean, sd};
+    });
+  });
+  return out;
+}
+/* test Welcha vs kontrola, df≈4, wartość krytyczna 2,78 (α=0,05) */
+function welch(a,b){
+  const sa=a.sd*a.sd/3, sb=b.sd*b.sd/3;
+  const den=Math.sqrt(sa+sb);
+  if(!den) return 0;
+  return (b.mean-a.mean)/den;
+}
+const TCRIT = 2.78;
+function sigOf(series){
+  const ctrl = series[0];
+  let best = 0, dirn = 0;
+  series.slice(1).forEach(s=>{
+    const t = welch(ctrl,s);
+    if(Math.abs(t) > Math.abs(best)){ best = t; dirn = Math.sign(t); }
+  });
+  return {t:best, sig: Math.abs(best) > TCRIT, dir: Math.abs(best)>TCRIT ? dirn : 0};
+}
+
+/* ---------- wykresy SVG ---------- */
+function ntaChart(mode){
+  // mode 0: czysty preparat (jeden pik ~115 nm); mode 1: zanieczyszczony (pik + agregaty)
+  const W=560,H=200,L=44,R=10,T=14,B=34;
+  const xs=[], ys=[];
+  for(let nm=20; nm<=420; nm+=5){
+    const peak = Math.exp(-((nm-115)**2)/(2*34*34));
+    const agg  = mode ? 0.62*Math.exp(-((nm-290)**2)/(2*62*62)) + 0.25*Math.exp(-((nm-45)**2)/(2*14*14)) : 0;
+    xs.push(nm); ys.push(peak+agg);
+  }
+  const ymax = Math.max(...ys)*1.12;
+  const sx = v => L + (v-20)/(420-20)*(W-L-R);
+  const sy = v => H-B - v/ymax*(H-B-T);
+  const pts = xs.map((v,i)=>`${sx(v).toFixed(1)},${sy(ys[i]).toFixed(1)}`).join(" ");
+  const xt=[50,100,150,200,250,300,350,400];
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+    aria-label="Rozkład wielkości cząstek z pomiaru NTA, od 20 do 420 nanometrów">
+    <rect x="${sx(30)}" y="${T}" width="${sx(200)-sx(30)}" height="${H-B-T}" fill="var(--lilac)" opacity=".16"/>
+    <text x="${(sx(30)+sx(200))/2}" y="${T+13}" text-anchor="middle" font-size="10"
+      fill="var(--ink-soft)" font-family="Poppins,sans-serif">zakres typowy dla EV</text>
+    <polyline points="${pts}" fill="none" stroke="var(--violet)" stroke-width="2"/>
+    <line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="var(--line)" stroke-width="1"/>
+    <line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="var(--line)" stroke-width="1"/>
+    ${xt.map(v=>`<text x="${sx(v)}" y="${H-B+15}" text-anchor="middle" font-size="10"
+      fill="var(--ink-soft)" font-family="JetBrains Mono,monospace">${v}</text>`).join("")}
+    <text x="${(L+W-R)/2}" y="${H-5}" text-anchor="middle" font-size="10.5"
+      fill="var(--ink-soft)" font-family="Poppins,sans-serif">średnica cząstki [nm]</text>
+    <text x="12" y="${(T+H-B)/2}" font-size="10.5" fill="var(--ink-soft)"
+      font-family="Poppins,sans-serif" transform="rotate(-90 12 ${(T+H-B)/2})"
+      text-anchor="middle">stężenie [j.u.]</text>
+  </svg>`;
+}
+
+function barChart(id, series){
+  const a = A_BY_ID[id];
+  const ctrl = series[0].mean || 1;
+  const pct = series.map(s=>({dose:s.dose, v:s.mean/ctrl*100, e:s.sd/ctrl*100}));
+  const W=300,H=168,L=40,R=10,T=16,B=40;
+  const hi = Math.max(130, ...pct.map(p=>p.v+p.e))*1.06;
+  const sy = v => H-B - v/hi*(H-B-T);
+  const bw = (W-L-R)/pct.length;
+  const col = a.grp==="anti"?"var(--anti)":a.grp==="pro"?"var(--pro)":a.grp==="redox"?"var(--redox)":"var(--flat)";
+  const ticks=[0,50,100].concat(hi>150?[150]:[]);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+    aria-label="${esc(a.nm)} w procentach kontroli dla kolejnych stężeń">
+    ${ticks.map(v=>`<line x1="${L}" y1="${sy(v)}" x2="${W-R}" y2="${sy(v)}"
+      stroke="var(--line)" stroke-width="${v===100?1.4:1}" stroke-dasharray="${v===100?"":"3 3"}"/>
+      <text x="${L-6}" y="${sy(v)+3.5}" text-anchor="end" font-size="9.5" fill="var(--ink-soft)"
+      font-family="JetBrains Mono,monospace">${v}</text>`).join("")}
+    ${pct.map((p,i)=>{
+      const x = L + i*bw + bw*0.22, w = bw*0.56;
+      const y = sy(p.v), h = Math.max(1, (H-B)-y);
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}"
+        fill="${p.dose===0?"var(--lilac)":col}" rx="2"/>
+        <line x1="${(x+w/2).toFixed(1)}" y1="${sy(p.v+p.e).toFixed(1)}"
+              x2="${(x+w/2).toFixed(1)}" y2="${sy(Math.max(0,p.v-p.e)).toFixed(1)}"
+              stroke="var(--ink)" stroke-width="1" opacity=".55"/>
+        <text x="${(x+w/2).toFixed(1)}" y="${H-B+14}" text-anchor="middle" font-size="9.5"
+          fill="var(--ink-soft)" font-family="JetBrains Mono,monospace">${p.dose===0?"K":p.dose}</text>`;
+    }).join("")}
+    <line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="var(--line)"/>
+    <text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle" font-size="9.5" fill="var(--ink-soft)"
+      font-family="Poppins,sans-serif">stężenie EV [µg/ml], K = kontrola</text>
+    <text x="12" y="${(T+H-B)/2}" font-size="9.5" fill="var(--ink-soft)" font-family="Poppins,sans-serif"
+      transform="rotate(-90 12 ${(T+H-B)/2})" text-anchor="middle">% kontroli</text>
+  </svg>`;
+}
+</script>
+
+<script>
+"use strict";
+/* ---------- ekrany ---------- */
+const SCORE = {good:1, meh:0.5, bad:0};
+
+function vScreen0(){
+  return `
+  <div class="card" style="margin-top:22px">
+    <span class="kicker">SKN „Paradise” · UWM Olsztyn · prototyp</span>
+    <h1>Cichy dialog</h1>
+    <p class="lede">Pasożyt, który dostał się do jelita, nie atakuje. Negocjuje. Wysyła do komórek
+    nabłonka pęcherzyki wielkości stu nanometrów i każe im ściszyć alarm. Tutaj przeprowadzisz
+    eksperyment, który to pokazuje — od wyizolowania pęcherzyków po wniosek, którego dane
+    jeszcze nie uprawniają.</p>
+    <div class="row" style="gap:7px">
+      <span class="pill">Anisakis simplex</span>
+      <span class="pill">pęcherzyki zewnątrzkomórkowe</span>
+      <span class="pill">nabłonek jelita Caco-2</span>
+      <span class="pill anti">immunomodulacja</span>
+      <span class="pill redox">homeostaza redoks</span>
+    </div>
+    <div class="hr"></div>
+    <h3>Wybierz poziom</h3>
+    <div class="opts">
+      ${Object.entries(LEVELS).map(([k,v])=>`
+        <button class="opt" data-lvl="${k}" type="button">
+          <span class="ol">${esc(v.nm)}</span>
+          <small style="color:var(--ink-soft)">${esc(v.d)}</small>
+        </button>`).join("")}
+    </div>
+    <div class="note">Kierunki wszystkich zmian odwzorowują wyniki opublikowane przez Koło
+    (<a href="https://pubmed.ncbi.nlm.nih.gov/42777528/" target="_blank" rel="noopener">Int J Med Microbiol 2026;323:151740</a>).
+    Wartości bezwzględne są ilustracyjne — publikacja podaje kierunki, a nie stężenia w pg/ml.
+    Rozrzut powtórzeń jest generowany losowo, więc każdy przebieg daje trochę inne liczby.</div>
+  </div>
+
+  <div class="card flat">
+    <span class="kicker">Jak to działa</span>
+    <h2 style="margin-top:4px">Pięć decyzji, jeden wynik</h2>
+    <ol style="padding-left:20px;font-size:.93rem;color:var(--ink-soft);margin:6px 0 0">
+      <li style="margin-bottom:6px"><b style="color:var(--ink)">Izolacja.</b> Składasz protokół. Zły krok nie kończy gry — psuje dane, a to widać dopiero później.</li>
+      <li style="margin-bottom:6px"><b style="color:var(--ink)">Charakterystyka.</b> Patrzysz na rozkład wielkości cząstek i decydujesz, czy preparat nadaje się do eksperymentu.</li>
+      <li style="margin-bottom:6px"><b style="color:var(--ink)">Ekspozycja.</b> Ustawiasz stężenia i czas. Budżet odczynników nie pozwoli zmierzyć wszystkiego.</li>
+      <li style="margin-bottom:6px"><b style="color:var(--ink)">Odczyty.</b> Wybierasz, co zmierzysz. Czego nie wybierzesz, tego nie będziesz wiedzieć.</li>
+      <li><b style="color:var(--ink)">Interpretacja.</b> Formułujesz wniosek. Narzędzie sprawdza, czy nie wyszedł poza dane.</li>
+    </ol>
+  </div>`;
+}
+
+function vProtokol(){
+  const i = S.picks.length;
+  let h = `<div class="card"><span class="kicker">Krok 1 z 5 · izolacja</span>
+    <h2 style="margin-top:4px">Składasz protokół izolacji</h2>
+    <p class="lede">Zbierasz pęcherzyki wydzielane przez żywe larwy L3 <i>Anisakis simplex</i>.
+    Cztery decyzje. Każda wpływa na czystość preparatu, a czystość preparatu — na to,
+    czy końcowym wynikom będzie można wierzyć.</p></div>`;
+
+  STEPS.forEach((st,si)=>{
+    if(si > i) return;
+    const done = si < i;
+    const pick = done ? S.picks[si] : null;
+    h += `<div class="card"><span class="kicker">Decyzja ${si+1} / 4</span>
+      <h3 style="margin-top:3px">${esc(st.q)}</h3>
+      ${(LEVELS[S.level].hints && !done) ? `<div class="fb"><b>Podpowiedź.</b> ${esc(st.why)}</div>` : ""}
+      <div class="opts">
+        ${st.opts.map((o,oi)=>{
+          const state = done ? (oi===pick ? o.s : "dim") : "";
+          return `<button class="opt" type="button" ${done?"disabled":""}
+            ${state?`data-state="${state}"`:""} data-step="${si}" data-opt="${oi}">
+            <span class="ol">${esc(o.t)}</span></button>`;
+        }).join("")}
+      </div>
+      ${done ? `<div class="fb ${st.opts[pick].s}"><b>${
+          st.opts[pick].s==="good"?"Trafnie.":st.opts[pick].s==="meh"?"Do przyjęcia.":"Problem."
+        }</b> ${esc(st.opts[pick].f)}</div>` : ""}
+    </div>`;
+  });
+
+  if(i === STEPS.length){
+    S.quality = S.picks.reduce((a,p,si)=>a+SCORE[STEPS[si].opts[p].s],0);
+    S.ratio = 0.6 + S.quality*0.95;
+    S.ntaMode = S.quality >= 3 ? 0 : 1;
+    h += `<div class="card"><h3>Protokół gotowy</h3>
+      <p class="lede">Inkubacja zakończona, frakcja zebrana. Teraz trzeba sprawdzić, co w niej jest.</p>
+      <div class="row end"><button class="btn" id="toChar" type="button">Przejdź do charakterystyki</button></div>
+    </div>`;
+  }
+  return h;
+}
+
+function vChar(){
+  const purity = S.ratio >= 3 ? "wysoka" : S.ratio >= 1.5 ? "średnia" : "niska";
+  const cls = S.ratio >= 3 ? "good" : S.ratio >= 1.5 ? "meh" : "bad";
+  let h = `<div class="card"><span class="kicker">Krok 2 z 5 · charakterystyka</span>
+    <h2 style="margin-top:4px">Czy to naprawdę pęcherzyki?</h2>
+    <p class="lede">Poniżej rozkład wielkości cząstek z pomiaru NTA oraz stosunek liczby cząstek
+    do ilości białka. Twoje zadanie: ocenić, czy preparat nadaje się do eksperymentu.</p>
+    <figure>${ntaChart(S.ntaMode)}
+      <figcaption>Rozkład wielkości cząstek w wyizolowanej frakcji. Pęcherzyki zewnątrzkomórkowe
+      mieszczą się zwykle w przedziale 30–200 nm (pole zacieniowane).</figcaption></figure>
+    <div class="hr"></div>
+    <dl class="kv">
+      <dt>Mediana średnicy</dt><dd class="num">${S.ntaMode? "162" : "118"} nm</dd>
+      <dt>Stosunek cząstek do białka</dt><dd class="num">${fmt(S.ratio,1)} × 10¹⁰ cząstek / µg</dd>
+      <dt>Ocena czystości</dt><dd>${purity}</dd>
+      <dt>Obraz TEM</dt><dd>${S.ntaMode
+        ? "struktury o zmiennym kształcie, częściowo bez wyraźnej błony, obecne agregaty"
+        : "okrągłe struktury z widoczną dwuwarstwową błoną, średnica zgodna z NTA"}</dd>
+    </dl>
+    <div class="note">Progi przyjęte w tym narzędziu, zgodne z powszechnie stosowanymi kryteriami
+    czystości preparatów EV: powyżej 3 × 10¹⁰ cząstek/µg — czystość wysoka, 1,5–3 × 10¹⁰ — średnia,
+    poniżej 1,5 × 10¹⁰ — niska, preparat zdominowany przez wolne białko.</div>
+  </div>`;
+
+  if(S.charOk === null){
+    h += `<div class="card"><h3>Co robisz?</h3>
+      <div class="opts">
+        <button class="opt" type="button" data-char="go"><span class="ol">Preparat nadaje się — przechodzę do eksperymentu</span></button>
+        <button class="opt" type="button" data-char="redo"><span class="ol">Preparat nie nadaje się — powtarzam izolację</span></button>
+      </div></div>`;
+  } else {
+    const right = (S.ratio>=3 && S.charOk==="go") || (S.ratio<1.5 && S.charOk==="redo");
+    const mid = S.ratio>=1.5 && S.ratio<3;
+    let msg;
+    if(mid){
+      msg = S.charOk==="go"
+        ? "Decyzja obronna. Przy czystości średniej można pracować, ale trzeba to zapisać w opisie metod i ostrożniej interpretować niewielkie różnice — część z nich może pochodzić od zanieczyszczeń."
+        : "Decyzja ostrożna i dopuszczalna. Przy czystości średniej powtórzenie izolacji nie jest konieczne, ale też nie jest błędem — zyskujesz pewność za cenę czasu.";
+    } else if(right){
+      msg = S.charOk==="go"
+        ? "Zgadza się. Jeden wąski pik w zakresie EV, zgodność NTA z obrazem TEM i wysoki stosunek cząstek do białka — to spełnia minimalne wymagania charakterystyki."
+        : "Zgadza się. Przy tak niskim stosunku cząstek do białka to nie jest preparat pęcherzyków, lecz mieszanina z przewagą wolnego białka. Każdy wynik byłby nieinterpretowalny.";
+    } else {
+      msg = S.charOk==="go"
+        ? "Tu jest pułapka. Rozkład jest dwumodalny — drugi pik powyżej 250 nm to agregaty — a stosunek cząstek do białka jest niski. Pracując na takiej frakcji, zmierzysz efekt zanieczyszczeń i przypiszesz go pasożytowi."
+        : "Preparat był dobry: jeden pik w zakresie EV i wysoka czystość. Powtórzenie izolacji nie zaszkodzi wynikom, ale kosztuje tydzień pracy. Umiejętność uznania wyniku za wystarczająco dobry też jest częścią metody.";
+    }
+    h += `<div class="card"><div class="fb ${mid?"meh":(right?"good":"bad")}">
+      <b>${mid?"Kompromis.":(right?"Dobra ocena.":"Zastanów się.")}</b> ${esc(msg)}</div>
+      <div class="row end">
+        ${S.charOk==="redo"
+          ? `<button class="btn" id="doRedo" type="button">Powtórz izolację</button>`
+          : `<button class="btn" id="toExp" type="button">Przejdź do ekspozycji</button>`}
+      </div></div>`;
+  }
+  return h;
+}
+
+function vExp(){
+  const maxD = LEVELS[S.level].doses;
+  const DOSES = [2.5,5,10,20];
+  const costD = S.doses.length*10;
+  return `<div class="card"><span class="kicker">Krok 3 z 5 · ekspozycja</span>
+    <h2 style="margin-top:4px">Traktujesz monowarstwę Caco-2</h2>
+    <p class="lede">Komórki są zróżnicowane i tworzą szczelną monowarstwę — model bariery jelita.
+    Kontrola bez pęcherzyków jest dodawana automatycznie i nie podlega negocjacji: bez niej
+    żadna zmierzona liczba nic nie znaczy.</p>
+    <div class="hr"></div>
+    <h3>Stężenia pęcherzyków</h3>
+    <p style="font-size:.86rem;color:var(--ink-soft)">Wybierz do ${maxD} ${maxD===2?"stężeń":"stężeń"}.
+    Im więcej punktów, tym pewniej ocenisz, czy efekt zależy od dawki — ale każde kosztuje 10 punktów budżetu.</p>
+    <div class="chips">
+      <span class="chip fixed">0 — kontrola</span>
+      ${DOSES.map(d=>`<button class="chip" type="button" data-dose="${d}"
+        data-on="${S.doses.includes(d)?1:0}"
+        ${(!S.doses.includes(d) && S.doses.length>=maxD)?"disabled":""}>${d} µg/ml</button>`).join("")}
+    </div>
+    <div class="ctl">
+      <label for="hrs">Czas ekspozycji: <span class="v" id="hrsV">${S.hours} h</span></label>
+      <input type="range" id="hrs" min="0" max="2" step="1" value="${[6,12,24].indexOf(S.hours)}">
+      <p style="font-size:.8rem;color:var(--ink-soft)">6 h — wczesna odpowiedź sygnałowa · 12 h — kompromis ·
+      24 h — pełna odpowiedź wydzielnicza, ale rośnie ryzyko zmian wtórnych.</p>
+    </div>
+    <div class="hr"></div>
+    <div class="budget"><span class="big" id="bud">${costD}</span>
+      <span>/ ${LEVELS[S.level].budget} punktów budżetu wykorzystane na warunki doświadczalne</span></div>
+    <div class="row end" style="margin-top:14px">
+      <button class="btn" id="toRead" type="button" ${S.doses.length?"":"disabled"}>Wybierz odczyty</button>
+    </div>
+    ${S.doses.length?"":`<p style="font-size:.84rem;color:var(--bad)">Wybierz co najmniej jedno stężenie.</p>`}
+  </div>`;
+}
+
+function vRead(){
+  const B = LEVELS[S.level].budget;
+  const costD = S.doses.length*10;
+  const costA = S.analytes.reduce((a,id)=>a+A_BY_ID[id].cost,0);
+  const spent = costD+costA;
+  const groups = [
+    ["Cytokiny — oś prozapalna","pro_main",["IL8"]],
+    ["Cytokiny — oś przeciwzapalna","anti",["IL10","IL13"]],
+    ["Cytokiny — pozostałe","flat",["IL4","IL6","IFNg"]],
+    ["Alarminy nabłonkowe","alarm",["IL33","TSLP"]],
+    ["Homeostaza redoks","redox",["SOD","MDA","TAC","GSH"]]
+  ];
+  return `<div class="card"><span class="kicker">Krok 4 z 5 · odczyty</span>
+    <h2 style="margin-top:4px">Czego nie zmierzysz, tego nie będziesz wiedzieć</h2>
+    <p class="lede">Budżet nie pozwala zmierzyć wszystkiego — i to jest celowe. Prawdziwy eksperyment
+    zawsze jest wyborem, a wybór odczytów przesądza, jaki wniosek będzie w ogóle możliwy.</p>
+    <div class="budget" style="margin-top:14px">
+      <span class="big" id="spent">${spent}</span><span>/ ${B} punktów</span></div>
+    <div class="bar"><i id="barf" class="${spent>B?"over":""}" style="width:${Math.min(100,spent/B*100)}%"></i></div>
+    <p style="font-size:.8rem;color:var(--ink-soft)">Warunki doświadczalne: ${costD} pkt
+      (${S.doses.length} ${S.doses.length===1?"stężenie":"stężenia"} + kontrola). Odczyty: ${costA} pkt.</p>
+  </div>
+  ${groups.map(([ttl,,ids])=>`
+    <div class="card"><h3>${esc(ttl)}</h3>
+      <div class="grid2">
+        ${ids.map(id=>{const a=A_BY_ID[id];const on=S.analytes.includes(id);
+          const over = !on && (spent + a.cost > B);
+          return `<label class="chk" data-on="${on?1:0}" style="${over?"opacity:.45":""}">
+            <input type="checkbox" data-an="${id}" ${on?"checked":""} ${over?"disabled":""}>
+            <span class="t"><b>${esc(a.nm)} <span style="font-weight:400;color:var(--ink-soft)">· ${a.cost} pkt</span></b>
+            <small>${esc(a.desc)}</small></span></label>`;
+        }).join("")}
+      </div></div>`).join("")}
+  <div class="card">
+    <div class="row end">
+      <button class="btn ghost" id="backExp" type="button">Wróć do warunków</button>
+      <button class="btn" id="runExp" type="button" ${S.analytes.length?"":"disabled"}>Uruchom pomiary</button>
+    </div>
+    ${S.analytes.length?"":`<p style="font-size:.84rem;color:var(--bad);margin-top:8px">Wybierz co najmniej jeden odczyt.</p>`}
+  </div>`;
+}
+</script>
+
+<script>
+"use strict";
+function vWyniki(){
+  const R = S.results, L = LEVELS[S.level];
+  const needMark = L.raw && !S.sigChecked;
+  let h = `<div class="card"><span class="kicker">Wyniki · ${S.hours} h ekspozycji</span>
+    <h2 style="margin-top:4px">Surowe wyniki, nie wnioski</h2>
+    <p class="lede">Każdy warunek zmierzony w trzech powtórzeniach. Słupki pokazują wartość
+    względem kontroli (100%), wąsy — odchylenie standardowe. ${L.stats
+      ? "Ocena istotności: test Welcha względem kontroli, wartość krytyczna |t| &gt; 2,78 (α = 0,05)."
+      : "Na tym poziomie wyniki podano jako średnie z trzech powtórzeń."}</p>
+    ${S.quality<3?`<div class="fb bad"><b>Uwaga do jakości preparatu.</b> Czystość Twojej frakcji
+      EV była ${S.ratio<1.5?"niska":"średnia"} (${fmt(S.ratio,1)} × 10¹⁰ cząstek/µg), dlatego rozrzut
+      powtórzeń jest wyraźnie większy. Część różnic, które widzisz, może nie pochodzić od pęcherzyków.</div>`:""}
+  </div>
+
+  <div class="card"><div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+    ${S.analytes.map(id=>{
+      const a=A_BY_ID[id], ser=R.data[id], st=sigOf(ser);
+      const gl = a.grp==="anti"?"anti":a.grp==="redox"?"redox":a.grp==="flat"?"":"pro";
+      return `<figure><div class="row" style="gap:7px;margin-bottom:4px">
+          <b style="font-size:.95rem">${esc(a.nm)}</b>
+          <span class="pill ${gl}">${a.grp==="anti"?"przeciwzapalne":a.grp==="pro"?"prozapalne / alarmina":a.grp==="redox"?"redoks":"kontrolne"}</span>
+          ${L.stats&&!needMark?`<span class="pill" style="margin-left:auto">${st.sig?`|t| = ${fmt(Math.abs(st.t),2)} · istotne`:`|t| = ${fmt(Math.abs(st.t),2)} · nieistotne`}</span>`:""}
+        </div>
+        ${barChart(id,ser)}
+        <figcaption>${esc(a.nm)} w ${esc(a.unit)}; kontrola = ${fmt(ser[0].mean, a.base<10?2:1)}</figcaption>
+      </figure>`;
+    }).join("")}
+  </div></div>
+
+  <div class="card"><h3>Tabela wyników</h3><div class="scroll"><table>
+    <thead><tr><th>Analit</th><th>Jednostka</th>
+      ${R.conds.map(d=>`<th style="text-align:right">${d===0?"kontrola":`<span class="u">${d} µg/ml</span>`}</th>`).join("")}</tr></thead>
+    <tbody>${S.analytes.map(id=>{
+      const a=A_BY_ID[id],ser=R.data[id],dp=a.base<10?2:1;
+      return `<tr><td><b>${esc(a.nm)}</b></td><td style="color:var(--ink-soft)">${esc(a.unit)}</td>
+        ${ser.map(s=>`<td class="n">${fmt(s.mean,dp)}${L.stats?` ± ${fmt(s.sd,dp)}`:""}</td>`).join("")}</tr>`;
+    }).join("")}</tbody></table></div>
+    ${L.raw?`<div class="hr"></div><h3>Powtórzenia techniczne</h3><div class="scroll"><table>
+      <thead><tr><th>Analit</th><th>Warunek</th><th style="text-align:right">1</th>
+        <th style="text-align:right">2</th><th style="text-align:right">3</th>
+        <th style="text-align:right">średnia</th><th style="text-align:right">SD</th></tr></thead>
+      <tbody>${S.analytes.map(id=>{const a=A_BY_ID[id],dp=a.base<10?2:1;
+        return R.data[id].map((s,si)=>`<tr>
+          <td>${si===0?`<b>${esc(a.nm)}</b>`:""}</td>
+          <td style="color:var(--ink-soft)">${s.dose===0?"kontrola":s.dose+" µg/ml"}</td>
+          ${s.reps.map(v=>`<td class="n">${fmt(v,dp)}</td>`).join("")}
+          <td class="n"><b>${fmt(s.mean,dp)}</b></td><td class="n">${fmt(s.sd,dp)}</td></tr>`).join("");
+      }).join("")}</tbody></table></div>`:""}
+  </div>`;
+
+  if(needMark){
+    h += `<div class="card"><span class="kicker">Zadanie poziomu „Badacz”</span>
+      <h3 style="margin-top:3px">Zanim zobaczysz ocenę — oceń sama/sam</h3>
+      <p class="lede">Zaznacz te anality, w których uznajesz zmianę względem kontroli za istotną.
+      Patrz na wielkość różnicy w stosunku do rozrzutu powtórzeń, nie tylko na wysokość słupka.</p>
+      <div class="grid2">${S.analytes.map(id=>`
+        <label class="chk" data-on="${S.userSig[id]?1:0}">
+          <input type="checkbox" data-sig="${id}" ${S.userSig[id]?"checked":""}>
+          <span class="t"><b>${esc(A_BY_ID[id].nm)}</b><small>zmiana istotna</small></span></label>`).join("")}
+      </div>
+      <div class="row end" style="margin-top:14px">
+        <button class="btn" id="checkSig" type="button">Sprawdź moją ocenę</button></div></div>`;
+  } else {
+    if(L.raw){
+      const rows = S.analytes.map(id=>{
+        const st=sigOf(R.data[id]); const mine=!!S.userSig[id];
+        const ok = mine===st.sig;
+        return `<div class="mrow"><span class="nm">${esc(A_BY_ID[id].nm)}</span>
+          <span>Ty: ${mine?"istotna":"nieistotna"}</span>
+          <span style="color:var(--ink-soft)">test: ${st.sig?"istotna":"nieistotna"}</span>
+          <span class="ar" style="margin-left:auto;color:${ok?"var(--ok)":"var(--bad)"}">${ok?"zgodnie":"rozbieżnie"}</span></div>`;
+      }).join("");
+      const score = S.analytes.filter(id=>(!!S.userSig[id])===sigOf(R.data[id]).sig).length;
+      h += `<div class="card"><h3>Twoja ocena a test statystyczny</h3>
+        <div class="match">${rows}</div>
+        <div class="fb ${score===S.analytes.length?"good":"meh"}"><b>${score} z ${S.analytes.length} zgodnie.</b>
+        Rozbieżności są normalne i pouczające: przy trzech powtórzeniach test ma małą moc, więc realna
+        zmiana może wyjść nieistotna, a przypadkowy rozrzut — istotna. Dlatego w publikacji liczba
+        powtórzeń i sposób ich liczenia są podawane zawsze.</div></div>`;
+    }
+    h += `<div class="card"><div class="row end">
+      <button class="btn" id="toInterp" type="button">Przejdź do interpretacji</button></div></div>`;
+  }
+  return h;
+}
+
+function vInterp(){
+  const measured = new Set(S.analytes);
+  const hasPro = ["IL8","IL33","TSLP"].some(x=>measured.has(x));
+  const hasRedox = ["SOD","MDA","TAC","GSH"].some(x=>measured.has(x));
+  let h = `<div class="card"><span class="kicker">Krok 5 z 5 · interpretacja</span>
+    <h2 style="margin-top:4px">Który wniosek mieści się w Twoich danych?</h2>
+    <p class="lede">Wszystkie poniższe zdania brzmią naukowo. Tylko jedno nie wychodzi poza to,
+    co zmierzyłaś/eś.</p>
+    <div class="opts">${CONCLUSIONS.map(c=>{
+      const st = S.conclusion===null ? "" : (c.id===S.conclusion ? (c.ok?"good":"bad") : (c.ok?"good":"dim"));
+      return `<button class="opt" type="button" ${S.conclusion!==null?"disabled":""}
+        ${st?`data-state="${st}"`:""} data-conc="${c.id}"><span class="ol">${esc(c.t)}</span></button>`;
+    }).join("")}</div></div>`;
+
+  if(S.conclusion!==null){
+    const chosen = CONCLUSIONS.find(c=>c.id===S.conclusion);
+    h += `<div class="card">
+      <div class="fb ${chosen.ok?"good":"bad"}"><b>${chosen.ok?"Tak.":"Nie."}</b> ${esc(chosen.f)}</div>`;
+    if(chosen.ok && !(hasPro && hasRedox)){
+      h += `<div class="fb meh"><b>Jedno zastrzeżenie.</b> Wniosek jest poprawny co do treści, ale
+        Twój zestaw odczytów go nie pokrywa w całości: ${!hasPro?"nie zmierzyłaś/eś żadnego markera prozapalnego ani alarminy":""}${(!hasPro&&!hasRedox)?" i ":""}${!hasRedox?"nie zmierzyłaś/eś żadnego parametru redoks":""}.
+        Poprawny wniosek wymaga nie tylko dobrego sformułowania, lecz także danych, które go uzasadniają.</div>`;
+    }
+    h += `<div class="hr"></div>
+      <h3>Pozostałe zdania — dlaczego nie</h3>
+      ${CONCLUSIONS.filter(c=>!c.ok && c.id!==S.conclusion).map(c=>`
+        <div class="fb"><b>„${esc(c.t)}”</b><br>${esc(c.f)}</div>`).join("")}
+      <div class="row end" style="margin-top:14px">
+        <button class="btn" id="toRaport" type="button">Zobacz raport</button></div></div>`;
+  }
+  return h;
+}
+
+function vRaport(){
+  const R=S.results;
+  const rows = S.analytes.map(id=>{
+    const a=A_BY_ID[id], st=sigOf(R.data[id]);
+    const obs = st.dir>0 ? "wzrost" : st.dir<0 ? "spadek" : "bez istotnej zmiany";
+    const arrow = st.dir>0?"↑":st.dir<0?"↓":"=";
+    const expect = a.dir>0?1:a.dir<0?-1:0;
+    const agree = st.dir===expect;
+    return {a,obs,arrow,agree,st,expect};
+  });
+  const agreeN = rows.filter(r=>r.agree).length;
+  const q = S.quality, qTxt = q>=3.5?"wzorowa":q>=3?"dobra":q>=2?"przeciętna":"niska";
+  const good = CONCLUSIONS.find(c=>c.id===S.conclusion)?.ok;
+
+  return `<div class="card">
+    <span class="kicker">Raport z eksperymentu</span>
+    <h2 style="margin-top:4px">Twój przebieg na tle publikacji</h2>
+    <dl class="kv" style="margin-top:10px">
+      <dt>Poziom</dt><dd>${esc(LEVELS[S.level].nm)}</dd>
+      <dt>Jakość izolacji</dt><dd>${qTxt} (${fmt(q,1)} / 4 pkt; ${fmt(S.ratio,1)} × 10¹⁰ cząstek/µg)</dd>
+      <dt>Powtórzenia izolacji</dt><dd>${S.redoCount}</dd>
+      <dt>Warunki</dt><dd class="num">kontrola + ${S.doses.join(", ")} µg/ml · ${S.hours} h</dd>
+      <dt>Zmierzone anality</dt><dd>${S.analytes.map(i=>esc(A_BY_ID[i].nm)).join(", ")}</dd>
+      <dt>Wniosek</dt><dd style="color:${good?"var(--ok)":"var(--bad)"}">${good?"mieści się w danych":"wychodzi poza dane"}</dd>
+    </dl>
+  </div>
+
+  <div class="card"><h3>Kierunki zmian: Twój wynik a wynik opublikowany</h3>
+    <div class="match" style="margin-top:10px">
+      ${rows.map(r=>`<div class="mrow">
+        <span class="nm">${esc(r.a.nm)}</span>
+        <span class="ar" style="color:${r.st.dir>0?"var(--anti)":r.st.dir<0?"var(--pro)":"var(--flat)"}">${r.arrow}</span>
+        <span>${r.obs}</span>
+        <span style="color:var(--ink-soft)">publikacja: ${esc(PUBLISHED[r.a.id])}</span>
+        <span class="ar" style="margin-left:auto;color:${r.agree?"var(--ok)":"var(--warn)"}">${r.agree?"zgodnie":"rozbieżnie"}</span>
+      </div>`).join("")}
+    </div>
+    <div class="fb ${agreeN===rows.length?"good":"meh"}" style="margin-top:12px">
+      <b>${agreeN} z ${rows.length} kierunków zgodnych z publikacją.</b>
+      ${agreeN<rows.length ? "Rozbieżność nie musi oznaczać błędu. Najczęstsze powody to zbyt niskie stężenie, zbyt krótki czas ekspozycji, trzy powtórzenia zamiast większej liczby oraz — jeśli czystość preparatu była niska — zanieczyszczenia wnoszące własny sygnał." : "Przy czystym preparacie, odpowiednim zakresie dawek i wystarczającym czasie ekspozycji symulacja odtwarza wzorzec opisany w publikacji."}
+    </div>
+    ${rows.some(r=>r.a.unc)?`<div class="note">Dla TAC i GSH abstrakt publikacji podaje, że wartości
+      <i>uległy zmianie</i>, bez jednoznacznego kierunku. W symulacji przyjęto niewielką zmianę wzrostową —
+      to świadome uproszczenie, oznaczone jako takie, a nie odwzorowanie wyniku.</div>`:""}
+  </div>
+
+  <div class="card"><h3>Co z tego wynika biologicznie</h3>
+    <p class="lede">Spadek IL-8 oraz alarmin IL-33 i TSLP przy jednoczesnym wzroście IL-10 i IL-13 to nie
+    wyłączenie odporności, lecz jej przestawienie. Nabłonek przestaje wzywać neutrofile i przestaje
+    ogłaszać uszkodzenie, a zaczyna wysyłać sygnały wyciszające. Równolegle rośnie aktywność dysmutazy
+    ponadtlenkowej i spada peroksydacja lipidów — komórka nie jest uszkadzana, lecz lepiej zabezpieczona
+    przed utlenianiem.</p>
+    <p class="lede">Dla pasożyta to warunek przetrwania: gwałtowne zapalenie zabija larwę razem z tkanką,
+    w której się znajduje. Dla nas to wskazówka, gdzie szukać cząsteczek o działaniu przeciwzapalnym.
+    I jedno, i drugie jest wnioskiem z monowarstwy komórek w szalce — nie z człowieka.</p>
+    <div class="hr"></div>
+    <h3>Źródło danych</h3>
+    <p style="font-size:.88rem">Stawicka M., Niestępska A., Stryiński R. <i>Extracellular vesicles of
+    Anisakis simplex s. s. modulate inflammatory signaling and oxidative homeostasis in human intestinal
+    epithelial cells.</i> International Journal of Medical Microbiology 2026;323:151740.
+    <a href="https://pubmed.ncbi.nlm.nih.gov/42777528/" target="_blank" rel="noopener">PubMed 42777528</a>,
+    doi: 10.1016/j.ijmm.2026.151740</p>
+    <div class="row end" style="margin-top:14px">
+      <button class="btn ghost" id="again" type="button">Przeprowadź eksperyment ponownie</button>
+      <button class="btn" id="openAtlas2" type="button">Otwórz Atlas</button></div>
+  </div>`;
+}
+
+/* ---------- render ---------- */
+const VIEWS = [vScreen0, vProtokol, vChar, vExp, vRead, vWyniki, vInterp, vRaport];
+function render(){
+  app.innerHTML = VIEWS[S.screen]() + `<footer>
+    Prototyp narzędzia do nieformalnej edukacji zdalnej · SKN Biochemii i Biologii Molekularnej
+    w Parazytologii „Paradise”, Wydział Biologii i Biotechnologii UWM w Olsztynie.
+    Narzędzie edukacyjne — nie jest źródłem porad medycznych ani weterynaryjnych.
+  </footer>`;
+  pips();
+}
+</script>
+
+<script>
+"use strict";
+/* ---------- panel referencyjny ---------- */
+document.getElementById("mechs").innerHTML = MECHS.map(m=>`
+  <div class="mech"><h4>${esc(m.h)}</h4><p>${esc(m.p)}</p>
+  ${m.s?`<p class="src">${m.u?`<a href="${esc(m.u)}" target="_blank" rel="noopener">${esc(m.s)}</a>`:esc(m.s)}</p>`:""}</div>`
+).join("");
+document.getElementById("gloss").innerHTML = `<dl class="kv">` + GLOSS.map(([t,d])=>
+  `<dt style="font-weight:600;color:var(--ink)">${esc(t)}</dt><dd style="font-weight:300;color:var(--ink-soft)">${esc(d)}</dd>`
+).join("") + `</dl>`;
+
+const atlas = document.getElementById("atlas");
+function openAtlas(){ atlas.hidden=false; document.getElementById("atlasClose").focus(); }
+function closeAtlas(){ atlas.hidden=true; }
+document.getElementById("atlasBtn").addEventListener("click",openAtlas);
+document.getElementById("atlasClose").addEventListener("click",closeAtlas);
+atlas.addEventListener("click",e=>{ if(e.target===atlas) closeAtlas(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !atlas.hidden) closeAtlas(); });
+
+/* ---------- obsługa zdarzeń (delegacja) ---------- */
+app.addEventListener("click", e=>{
+  const t = e.target.closest("button");
+  if(!t) return;
+
+  if(t.dataset.lvl){ S.level=t.dataset.lvl; go(1); return; }
+
+  if(t.dataset.step!==undefined && !t.disabled){
+    const si=+t.dataset.step;
+    if(si===S.picks.length){ S.picks.push(+t.dataset.opt); render(); }
+    return;
+  }
+  if(t.id==="toChar"){ S.charOk=null; go(2); return; }
+
+  if(t.dataset.char){ S.charOk=t.dataset.char; render(); return; }
+  if(t.id==="doRedo"){
+    S.redoCount++; S.picks=[]; S.charOk=null; S.quality=0; S.ratio=0; go(1); return;
+  }
+  if(t.id==="toExp"){ go(3); return; }
+
+  if(t.dataset.dose!==undefined){
+    const d=+t.dataset.dose, i=S.doses.indexOf(d);
+    if(i>-1) S.doses.splice(i,1);
+    else if(S.doses.length < LEVELS[S.level].doses) S.doses.push(d);
+    S.doses.sort((a,b)=>a-b);
+    render(); return;
+  }
+  if(t.id==="toRead"){ go(4); return; }
+  if(t.id==="backExp"){ go(3); return; }
+  if(t.id==="runExp"){
+    S.results = simulate(); S.sigChecked=false; S.userSig={}; go(5); return;
+  }
+  if(t.id==="checkSig"){ S.sigChecked=true; render(); return; }
+  if(t.id==="toInterp"){ S.conclusion=null; go(6); return; }
+  if(t.dataset.conc && !t.disabled){ S.conclusion=t.dataset.conc; render(); return; }
+  if(t.id==="toRaport"){ go(7); return; }
+  if(t.id==="openAtlas2"){ openAtlas(); return; }
+  if(t.id==="again"){
+    Object.assign(S,{screen:0,level:null,picks:[],quality:0,ratio:0,ntaMode:0,charOk:null,
+      doses:[],hours:12,analytes:[],results:null,userSig:{},sigChecked:false,conclusion:null,redoCount:0});
+    go(0); return;
+  }
+});
+
+app.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.dataset.an){
+    const id=el.dataset.an, i=S.analytes.indexOf(id);
+    if(el.checked){ if(i<0) S.analytes.push(id); } else if(i>-1) S.analytes.splice(i,1);
+    S.analytes.sort((a,b)=>ANALYTES.findIndex(x=>x.id===a)-ANALYTES.findIndex(x=>x.id===b));
+    render(); return;
+  }
+  if(el.dataset.sig){ S.userSig[el.dataset.sig]=el.checked; el.closest(".chk").dataset.on=el.checked?1:0; return; }
+});
+
+app.addEventListener("input", e=>{
+  if(e.target.id==="hrs"){
+    S.hours=[6,12,24][+e.target.value];
+    document.getElementById("hrsV").textContent=S.hours+" h";
+  }
+});
+
+/* ---------- start ---------- */
+render();
+</script>
+</body>
+</html>
